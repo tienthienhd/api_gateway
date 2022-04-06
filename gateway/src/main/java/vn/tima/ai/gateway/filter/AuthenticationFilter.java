@@ -42,7 +42,7 @@ public class AuthenticationFilter implements GatewayFilter {
             return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
-        this.populateRequestWithHeaders(exchange, token);
+//        this.populateRequestWithHeaders(exchange, token);
 
         return chain.filter(exchange);
     }
@@ -64,10 +64,13 @@ public class AuthenticationFilter implements GatewayFilter {
     }
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {
-        Claims claims = jwtUtil.parseToken(token);
+//        Claims claims = jwtUtil.parseToken(token);
+        Claims claims = jwtUtil.parseJwt(token);
+        String sub = String.valueOf(claims.get("sub"));
+        String authorities = String.valueOf(claims.get("authorities"));
         exchange.getRequest().mutate()
-                .header("id", String.valueOf(claims.get("id")))
-                .header("role", String.valueOf(claims.get("role")))
+                .header("sub", String.valueOf(claims.get("sub")))
+//                .header("authorities", String.valueOf(claims.get("authorities")))
                 .build();
     }
 }

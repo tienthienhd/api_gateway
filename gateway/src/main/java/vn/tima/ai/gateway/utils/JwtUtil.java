@@ -13,14 +13,21 @@ import java.security.Key;
 import java.util.Collection;
 import java.util.Date;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:VVmnwNb5FSiSN4s2jPzQYloe6dExOnRX}")
-    private String jwtSecret;
+    @Value("${jwt.secret:7aW-RZ5Jb_V5p_CCC1r79sfWiSebxAZf4MILDJ9E9TIV2R9F_3aVvA2st85rf4C4PleM_EE-0B6Bu6xAQB0TEE8di7zsXv1I_KC2Yt2bz7dcnKAu63YlBVETklbsSLya7dKHfGzAcaA3Byka0sd5onVMDT9w85UUuN9tyf1zE7R_tbKt-Y30IW0aUoWkjn0uM9APbkMOUcvSg5Ym8JlwSFDrkFQFn6IKVoiOd0B5pMB15pX8kojWYP441pjfOmGYiuMDrrsIyUQ6xjQBhtn11lYtJo0QbrC89dVS-oVhqkDLUO12gQ7-jCx4WZs7n8uLuUt3glu0VHD8GqMlW5rEJw")
+    private String jwtSecret="7aW-RZ5Jb_V5p_CCC1r79sfWiSebxAZf4MILDJ9E9TIV2R9F_3aVvA2st85rf4C4PleM_EE-0B6Bu6xAQB0TEE8di7zsXv1I_KC2Yt2bz7dcnKAu63YlBVETklbsSLya7dKHfGzAcaA3Byka0sd5onVMDT9w85UUuN9tyf1zE7R_tbKt-Y30IW0aUoWkjn0uM9APbkMOUcvSg5Ym8JlwSFDrkFQFn6IKVoiOd0B5pMB15pX8kojWYP441pjfOmGYiuMDrrsIyUQ6xjQBhtn11lYtJo0QbrC89dVS-oVhqkDLUO12gQ7-jCx4WZs7n8uLuUt3glu0VHD8GqMlW5rEJw";
 
+    String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
+    Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret),
+            SignatureAlgorithm.HS256.getJcaName());
 
-    private Key key;
+    private Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());;
 
     @PostConstruct
     public void init() {
@@ -28,7 +35,32 @@ public class JwtUtil {
     }
 
     public Claims parseToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Jwts.parserBuilder().setSigningKey(key).build();
+        token = token.replaceFirst("Bearer ", "");
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Claims parseJwt(String jwtString) {
+        String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
+        Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret),
+                SignatureAlgorithm.HS256.getJcaName());
+        jwtString = jwtString.replaceFirst("Bearer ", "");
+
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(hmacKey)
+                .build()
+                .parseClaimsJws(jwtString)
+                .getBody();
+
+        return Jwts.parserBuilder()
+                .setSigningKey(hmacKey)
+                .build()
+                .parseClaimsJws(jwtString)
+                .getBody();
     }
 
 
@@ -50,9 +82,37 @@ public class JwtUtil {
                 .signWith(key).compact();
     }
 
+    public String generateToken(String appId, Collection<String> authorityRoles, Long acceptDay) {
+        String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
+
+        Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret),
+                SignatureAlgorithm.HS256.getJcaName());
+
+        long now = System.currentTimeMillis();
+        Date issuedAt = new Date(now);
+        Date expiredDate;
+        if (acceptDay != null) {
+            expiredDate = new Date(now + (86400000L * acceptDay));
+        } else {
+            expiredDate = new Date(now + 86400000L);
+        }
+        String jwtToken = Jwts.builder()
+                .setSubject(appId)
+                .claim("authorities", authorityRoles)
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiredDate)
+                .signWith(hmacKey)
+                .compact();
+
+        return jwtToken;
+
+    }
+
+
     public void validateToken(final String token) throws JwtTokenMalformedException, JwtTokenMissingException {
         try {
-            parseToken(token);
+//            parseToken(token);
+            parseJwt(token);
         } catch (SignatureException ex) {
             throw new JwtTokenMalformedException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
