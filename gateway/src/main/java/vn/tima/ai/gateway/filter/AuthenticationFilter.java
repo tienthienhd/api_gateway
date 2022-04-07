@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -18,6 +20,9 @@ import vn.tima.ai.gateway.exception.JwtTokenMissingException;
 import vn.tima.ai.gateway.utils.JwtUtil;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import vn.tima.ai.gateway.model.ProductRole;
+import vn.tima.ai.gateway.service.SecurityDefaultService;
 
 @RefreshScope
 @Component
@@ -25,6 +30,9 @@ public class AuthenticationFilter implements GatewayFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    public SecurityDefaultService authorizationService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -37,7 +45,12 @@ public class AuthenticationFilter implements GatewayFilter {
         final String token = this.getAuthHeader(request);
 
         try {
-            jwtUtil.validateToken(token);
+            Claims claims = jwtUtil.validateToken(token);
+            System.out.println(claims);
+
+            List<ProductRole> roles= authorizationService.getAllRoles(); // roles sorted
+            System.out.println(roles);
+
         } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
             return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
         }

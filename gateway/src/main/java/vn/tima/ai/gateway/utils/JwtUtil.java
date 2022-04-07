@@ -109,10 +109,10 @@ public class JwtUtil {
     }
 
 
-    public void validateToken(final String token) throws JwtTokenMalformedException, JwtTokenMissingException {
+    public Claims validateToken(final String token) throws JwtTokenMalformedException, JwtTokenMissingException {
         try {
 //            parseToken(token);
-            parseJwt(token);
+            return parseJwt(token);
         } catch (SignatureException ex) {
             throw new JwtTokenMalformedException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {

@@ -10,22 +10,37 @@ eureka:
 spring:
   application:
     name: gateway-service
-  cloud:
-    gateway:
-      routes:
-        - id: employeeModule
-          uri: lb://FIRST-SERVICE
-          predicates:
-            - Path=/employee/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: fallbackCommand
-                fallbackUri: forward:/fallback/first
-        - id: consumerModule
-          uri: lb://SECOND-SERVICE
-          predicates:
-            - Path=/consumer/**
+#  cloud:
+#    gateway:
+#      routes:
+##        - id: employeeModule
+##          uri: lb://FIRST-SERVICE
+##          predicates:
+##            - Path=/employee/**
+##          filters:
+##            - name: CircuitBreaker
+##              args:
+##                name: fallbackCommand
+##                fallbackUri: forward:/fallback/first
+#        - id: consumerModule
+#          uri: lb://SECOND-SERVICE
+#          predicates:
+#            - Path=/consumer/**
+#
+#        - id: employeeModule
+#          uri: lb://FIRST-SERVICE
+#          predicates:
+#            - Path=/employee/**
+#          filters:
+#            - name: CircuitBreaker
+#              args:
+#                name: fallbackCommand
+#                fallbackUri: forward:/fallback/first
+#
+#        - id: checkEditedContractModule
+#          uri: lb://CONTRACT-CHECK-EDITED-TEST-LOCAL
+#          predicates:
+#            - Path=/**
 
 
 logging:
