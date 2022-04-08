@@ -11,18 +11,18 @@ import vn.tima.ai.gateway.filter.AuthenticationFilter;
 @Configuration
 public class GatewayConfig {
 
-    @Autowired
-    AuthenticationFilter filter;
-
-    @Bean
-    public RouteLocator routes(RouteLocatorBuilder builder) {
-        return builder.routes()
-                .route("FIRST-SERVICE", r -> r.path("/**")
-//                        .filters(f -> f.filter(filter).filter(filter2))
-                        .filters(f -> f.filter(filter))
-                        .uri("lb://FIRST-SERVICE"))
-
-                .build();
-    }
+//    @Autowired
+//    AuthenticationFilter filter;
+//
+//    @Bean
+//    public RouteLocator routes(RouteLocatorBuilder builder) {
+//        return builder.routes()
+//                .route("FIRST-SERVICE", r -> r.path("/**")
+////                        .filters(f -> f.filter(filter).filter(filter2))
+//                        .filters(f -> f.filter(filter))
+//                        .uri("lb://FIRST-SERVICE"))
+//
+//                .build();
+//    }
 
 }

@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "product_feature_role_v2")
+@Table(name = "product_feature_role")
 @ToString
 public class ProductRole {
 

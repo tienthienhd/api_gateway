@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "product_partners_v2")
+@Table(name = "product_partners")
 @ToString
 public class ProductPartner {
 

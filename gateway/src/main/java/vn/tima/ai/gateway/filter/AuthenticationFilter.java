@@ -1,6 +1,8 @@
 package vn.tima.ai.gateway.filter;
 
 import io.jsonwebtoken.Claims;
+import lombok.extern.log4j.Log4j2;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -8,6 +10,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -20,41 +23,56 @@ import vn.tima.ai.gateway.exception.JwtTokenMissingException;
 import vn.tima.ai.gateway.utils.JwtUtil;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import vn.tima.ai.gateway.model.ProductRole;
-import vn.tima.ai.gateway.service.SecurityDefaultService;
+import vn.tima.ai.gateway.service.SecurityAdminService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @RefreshScope
 @Component
-public class AuthenticationFilter implements GatewayFilter {
+@Log4j2
+public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
-    public SecurityDefaultService authorizationService;
+    public SecurityAdminService securityAdminService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-
-        if (this.isAuthMissing(request))
-            return this.onError(exchange, "Authorization header is missing in request", HttpStatus.UNAUTHORIZED);
-
-        final String token = this.getAuthHeader(request);
-
-        try {
-            Claims claims = jwtUtil.validateToken(token);
-            System.out.println(claims);
-
-            List<ProductRole> roles= authorizationService.getAllRoles(); // roles sorted
-            System.out.println(roles);
-
-        } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
-            return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
+        String[] split_path = request.getPath().toString().split("/");
+        String pathRegex = "/" + split_path[2] + "/**";
+        ProductRole role = securityAdminService.getRoleIdByPath(pathRegex);
+        log.info("role: " + role.getRoleId());
+        if (role.getRoleId().contains("PUBLIC")){
+            return chain.filter(exchange);
         }
+        else{
+            if (this.isAuthMissing(request)){
+                return this.onError(exchange, "Authorization header is missing in request", HttpStatus.UNAUTHORIZED);}
+            else{
+                try {
+                    final String token = this.getAuthHeader(request);
+                    Claims claims = jwtUtil.validateToken(token);
+                    String authorities = String.valueOf(claims.get("authorities"));
+                    log.info("claims: " + claims);
 
+                    if (!authorities.contains(role.getRoleId())) {
+                        return this.onError(exchange, "UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+                    }
+                } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
+                    return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
+                }
+            }
+        }
 //        this.populateRequestWithHeaders(exchange, token);
 
         return chain.filter(exchange);
@@ -85,5 +103,10 @@ public class AuthenticationFilter implements GatewayFilter {
                 .header("sub", String.valueOf(claims.get("sub")))
 //                .header("authorities", String.valueOf(claims.get("authorities")))
                 .build();
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 }

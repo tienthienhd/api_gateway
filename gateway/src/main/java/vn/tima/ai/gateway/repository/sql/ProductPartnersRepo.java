@@ -1,13 +1,13 @@
 package vn.tima.ai.gateway.repository.sql;
 
 
-import vn.tima.ai.gateway.model.ProductPartner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import vn.tima.ai.gateway.model.ProductPartner;
 
 @Repository
 public interface ProductPartnersRepo extends JpaRepository<ProductPartner, String> {

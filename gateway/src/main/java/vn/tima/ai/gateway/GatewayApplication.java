@@ -23,13 +23,6 @@ public class GatewayApplication {
 
     public static void main(String[] args) {
 
-//        JwtUtil jwt_util = new JwtUtil();
-//
-//        List authorities = Arrays.asList(new String[]{"ROLE_amazing_crawler","ROLE_appraisal_auto_check","ROLE_auto_moj_secured_transfer"});
-//        String gen_token = jwt_util.generateToken("ai_super_admin_test",
-//                authorities,86400000000L);
-//        System.out.println("TOKEN: "+gen_token);
-
         SpringApplication.run(GatewayApplication.class, args);
     }
 
