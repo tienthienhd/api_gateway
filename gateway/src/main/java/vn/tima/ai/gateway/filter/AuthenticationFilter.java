@@ -32,6 +32,8 @@ import vn.tima.ai.gateway.service.SecurityAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.validation.constraints.Null;
+
 
 @RefreshScope
 @Component
@@ -50,30 +52,37 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         String[] split_path = request.getPath().toString().split("/");
         String pathRegex = "/" + split_path[2] + "/**";
-        ProductRole role = securityAdminService.getRoleIdByPath(pathRegex);
-        log.info("role: " + role.getRoleId());
-        if (role.getRoleId().contains("PUBLIC")){
-            return chain.filter(exchange);
-        }
-        else{
-            if (this.isAuthMissing(request)){
-                return this.onError(exchange, "Authorization header is missing in request", HttpStatus.UNAUTHORIZED);}
-            else{
-                try {
-                    final String token = this.getAuthHeader(request);
-                    Claims claims = jwtUtil.validateToken(token);
-                    String authorities = String.valueOf(claims.get("authorities"));
-                    log.info("claims: " + claims);
+        String childPathRegex = "/";
 
-                    if (!authorities.contains(role.getRoleId())) {
-                        return this.onError(exchange, "UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+        for (int i = 1; i < split_path.length; i++){
+            childPathRegex += split_path[i];
+            ProductRole role = securityAdminService.getRoleIdByPath(childPathRegex);
+
+            if (role != null) {
+                log.info("role: " + role.getRoleId());
+                if (role.getRoleId().contains("PUBLIC")) {
+                    return chain.filter(exchange);
+                } else {
+                    if (this.isAuthMissing(request)) {
+                        return this.onError(exchange, "Authorization header is missing in request", HttpStatus.UNAUTHORIZED);
+                    } else {
+                        try {
+                            final String token = this.getAuthHeader(request);
+                            Claims claims = jwtUtil.validateToken(token);
+                            String authorities = String.valueOf(claims.get("authorities"));
+                            log.info("claims: " + claims);
+
+                            if (!authorities.contains(role.getRoleId())) {
+                                return this.onError(exchange, "UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
+                            }
+                        } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
+                            return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
+                        }
                     }
-                } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
-                    return this.onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
                 }
+//        this.populateRequestWithHeaders(exchange, token);
             }
         }
-//        this.populateRequestWithHeaders(exchange, token);
 
         return chain.filter(exchange);
     }

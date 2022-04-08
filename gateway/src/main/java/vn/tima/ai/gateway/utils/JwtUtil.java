@@ -92,8 +92,7 @@ public class JwtUtil {
         Date issuedAt = new Date(now);
         Date expiredDate;
         if (acceptDay != null) {
-//            expiredDate = new Date(now + (86400000L * acceptDay));
-            expiredDate = new Date(now);
+            expiredDate = new Date(now + (86400000L * acceptDay));
         } else {
             expiredDate = new Date(now + 86400000L);
         }
