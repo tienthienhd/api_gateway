@@ -37,6 +37,20 @@ public class TestController {
         return token;
     }
 
+    @RequestMapping("/gen_token1")
+    public String genToken1(){
+        List authorities = Arrays.asList("appraisal_auto_check_1");
+        String token = jwtUtil.generateToken("ai_super_admin_test", authorities,86400000000L);
+        return token;
+    }
+
+    @RequestMapping("/gen_token2")
+    public String genToken2(){
+        List authorities = Arrays.asList("appraisal_auto_check_2");
+        String token = jwtUtil.generateToken("ai_super_admin_test", authorities,86400000000L);
+        return token;
+    }
+
     @RequestMapping("/gen_token_public")
     public String genTokenPublic(){
         List authorities = Arrays.asList("PUBLIC");

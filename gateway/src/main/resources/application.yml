@@ -1,39 +1,45 @@
-server:
-  port: 8080
-
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8083/eureka
-
-spring:
-  application:
-    name: gateway-service
-  cloud:
-    gateway:
-      routes:
-        - id: employeeModule
-          uri: lb://FIRST-SERVICE
-          predicates:
-            - Path=/service1/**
-
-#          filters:
-#            - name: CircuitBreaker
-#              args:
-#                name: fallbackCommand
-#                fallbackUri: forward:/fallback/first
-
-        - id: consumerModule
-          uri: lb://SECOND-SERVICE
-          predicates:
-            - Path=/consumer/**
-      default-filters:
-        - StripPrefix=1
-
-
-
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
+#server:
+#  port: 8080
+#
+#
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8083/eureka
+#
+#spring:
+#  application:
+#    name: gateway-service
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: employeeModule
+#          uri: lb://FIRST-SERVICE
+#          predicates:
+#            - Path=/service1/**
+#
+##          filters:
+##            - name: CircuitBreaker
+##              args:
+##                name: fallbackCommand
+##                fallbackUri: forward:/fallback/first
+#
+#        - id: consumerModule
+#          uri: lb://SECOND-SERVICE
+#          predicates:
+#            - Path=/consumer/**
+#
+#        - id: securityModule
+#          uri: lb://CENTER-SECURITY
+#          predicates:
+#            - Path=/security/**
+#
+#      default-filters:
+#        - StripPrefix=1
+#
+#
+#
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    reactor.netty.http.client: DEBUG
