@@ -9,14 +9,14 @@ import javax.persistence.*;
 @Entity
 @Table(name = "log_request_api_gateway")
 @ToString
-public class LogRequests {
+public class LogRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    protected int id;
+    protected Integer id;
 
     @Column(name = "request_id")
-    protected String request_id;
+    protected String requestId;
 
     @Column(name = "uri")
     protected String uri;
@@ -34,16 +34,16 @@ public class LogRequests {
     protected String path;
 
     @Column(name = "app_id")
-    protected String app_id;
+    protected String appId;
 
     @Column(name = "host_address")
-    protected String host_address;
+    protected String hostAddress;
 
     @Column(name = "input_body")
-    protected String input_body;
+    protected String inputBody;
 
     @Column(name = "status_code")
-    protected String status_code;
+    protected String statusCode;
 
     @Column(name = "response")
     protected String response;

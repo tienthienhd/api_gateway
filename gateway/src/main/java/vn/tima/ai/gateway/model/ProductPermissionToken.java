@@ -18,20 +18,28 @@ public class ProductPermissionToken implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    protected int id;
+    protected Integer id;
+
     @Column(name = "token", columnDefinition = "TEXT")
     protected String token;
+
     @Column(name = "app_id")
     protected String appId;
+
     @Column(name = "is_active")
     protected boolean isActive;
+
     @Column(name = "expired_date")
     protected Date expiredDate;
 
     public ProductPermissionToken(String token, String appId, Date expiredDate) {
         this.token = token;
         this.appId = appId;
-        this.expiredDate=expiredDate;
-        this.isActive=true;
+        this.expiredDate = expiredDate;
+        this.isActive = true;
+    }
+
+    public ProductPermissionToken() {
+
     }
 }

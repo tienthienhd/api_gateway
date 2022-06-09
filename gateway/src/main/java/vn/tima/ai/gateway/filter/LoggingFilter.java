@@ -32,15 +32,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import sun.rmi.runtime.Log;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ORIGINAL_REQUEST_URL_ATTR;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
 
 import vn.tima.ai.gateway.exception.JwtTokenMalformedException;
 import vn.tima.ai.gateway.exception.JwtTokenMissingException;
-import vn.tima.ai.gateway.model.LogRequests;
-import vn.tima.ai.gateway.repository.sql.LogRequestsRepo;
+import vn.tima.ai.gateway.model.LogRequest;
+import vn.tima.ai.gateway.repository.sql.LogRequestRepo;
 import vn.tima.ai.gateway.utils.JwtUtil;
 
 @Slf4j
@@ -55,7 +54,7 @@ public class LoggingFilter implements GlobalFilter, Ordered {
     ));
 
     @Autowired
-    LogRequestsRepo logRequestsRepo;
+    LogRequestRepo logRequestRepo;
 
     @Autowired
     JwtUtil jwtUtil;
@@ -64,96 +63,97 @@ public class LoggingFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(
             ServerWebExchange exchange, GatewayFilterChain chain
     ) {
-        Claims claims = null;
-        try {
-            if(exchange.getRequest().getHeaders().get("Authorization") != null){
-                String authorization = exchange.getRequest().getHeaders().get("Authorization").get(0);
-                log.info("authorization" + authorization);
-                claims = jwtUtil.validateToken(authorization);
-                String app_id = String.valueOf(claims.get("sub"));
-                exchange.getRequest().mutate().header("app-id", app_id).build();
-
-                LogRequests logRequests = new LogRequests();
-                // First we get here request in exchange
-                var requestMutated = new ServerHttpRequestDecorator(exchange.getRequest()) {
-                    @Override
-                    public Flux<DataBuffer> getBody() {
-                        var requestLogger = new Logger(getDelegate());
-                        if(LOGGABLE_CONTENT_TYPES.contains(String.valueOf(getHeaders().getContentType()).toLowerCase())) {
-                            return super.getBody().map(ds -> {
-                                requestLogger.appendBody(ds.asByteBuffer());
-
-                                logRequests.setRequest_id(exchange.getRequest().getId());
-                                logRequests.setUri(String.valueOf(exchange.getRequest().getURI()));
-                                logRequests.setMethod(exchange.getRequest().getMethod().toString());
-                                Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-                                logRequests.setTimestamp(timeStamp.toString());
-                                logRequests.setPath(exchange.getRequest().getPath().toString());
-                                logRequests.setApp_id(app_id);
-                                String request_body = StandardCharsets.UTF_8.decode(ds.asByteBuffer()).toString();
-                                logRequests.setInput_body(request_body);
-                                logRequestsRepo.save(logRequests);
-
-                                return ds;
-                            }).doFinally((s) -> requestLogger.log());
-                        } else {
-                            requestLogger.log();
-
-                            logRequests.setRequest_id(exchange.getRequest().getId());
-                            logRequests.setUri(String.valueOf(exchange.getRequest().getURI()));
-                            logRequests.setMethod(exchange.getRequest().getMethod().toString());
-                            Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-                            logRequests.setTimestamp(timeStamp.toString());
-                            logRequests.setPath(exchange.getRequest().getPath().toString());
-                            logRequests.setApp_id(app_id);
-
-                            logRequestsRepo.save(logRequests);
-                            return super.getBody();
-                        }
-
-                    }
-                };
-
-                var responseMutated = new ServerHttpResponseDecorator(exchange.getResponse()) {
-                    @Override
-                    public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-                        var responseLogger = new Logger(getDelegate());
-                        LogRequests logRequests1 = logRequestsRepo.findByRequest_id(exchange.getRequest().getId());
-                        if(LOGGABLE_CONTENT_TYPES.contains(String.valueOf(getHeaders().getContentType()).toLowerCase())) {
-                            return join(body).flatMap(db -> {
-                                responseLogger.appendBody(db.asByteBuffer());
-                                responseLogger.log();
-                                String response_body = StandardCharsets.UTF_8.decode(db.asByteBuffer()).toString();
-
-                                if (logRequests1 != null){
-                                    logRequests1.setResponse(response_body);
-                                    logRequests1.setStatus_code(exchange.getResponse().getStatusCode().toString());
-                                    logRequestsRepo.save(logRequests1);
-                                }
-                                return getDelegate().writeWith(Mono.just(db));
-                            });
-                        } else {
-                            responseLogger.log();
-                            if (logRequests1 != null){
-                                logRequests1.setStatus_code(exchange.getResponse().getStatusCode().toString());
-                                logRequestsRepo.save(logRequests1);
-                            }
-                            return getDelegate().writeWith(body);
-                        }
-
-                    }
-                };
-                return chain.filter(exchange.mutate().request(requestMutated).response(responseMutated).build());
-            }
-        } catch (JwtTokenMalformedException e) {
-            e.printStackTrace();
-        } catch (JwtTokenMissingException e) {
-            e.printStackTrace();
-        }
-
-
-
-        return chain.filter(exchange);
+//        Claims claims = null;
+//        try {
+//            if(exchange.getRequest().getHeaders().get("Authorization") != null){
+//                String authorization = exchange.getRequest().getHeaders().get("Authorization").get(0);
+//                log.info("authorization" + authorization);
+//                claims = jwtUtil.validateToken(authorization);
+//                String app_id = String.valueOf(claims.get("sub"));
+//                exchange.getRequest().mutate().header("app-id", app_id).build();
+//
+//                LogRequest logRequest = new LogRequest();
+//                // First we get here request in exchange
+//                var requestMutated = new ServerHttpRequestDecorator(exchange.getRequest()) {
+//                    @Override
+//                    public Flux<DataBuffer> getBody() {
+//                        var requestLogger = new Logger(getDelegate());
+//                        if(LOGGABLE_CONTENT_TYPES.contains(String.valueOf(getHeaders().getContentType()).toLowerCase())) {
+//                            return super.getBody().map(ds -> {
+//                                requestLogger.appendBody(ds.asByteBuffer());
+//
+//                                logRequest.setRequestId(exchange.getRequest().getId());
+//                                logRequest.setUri(String.valueOf(exchange.getRequest().getURI()));
+//                                logRequest.setMethod(exchange.getRequest().getMethod().toString());
+//                                Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+//                                logRequest.setTimestamp(timeStamp.toString());
+//                                logRequest.setPath(exchange.getRequest().getPath().toString());
+//                                logRequest.setAppId(app_id);
+//                                String request_body = StandardCharsets.UTF_8.decode(ds.asByteBuffer()).toString();
+//                                logRequest.setInputBody(request_body);
+//                                logRequestRepo.save(logRequest);
+//
+//                                return ds;
+//                            }).doFinally((s) -> requestLogger.log());
+//                        } else {
+//                            requestLogger.log();
+//
+//                            logRequest.setRequestId(exchange.getRequest().getId());
+//                            logRequest.setUri(String.valueOf(exchange.getRequest().getURI()));
+//                            logRequest.setMethod(exchange.getRequest().getMethod().toString());
+//                            Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+//                            logRequest.setTimestamp(timeStamp.toString());
+//                            logRequest.setPath(exchange.getRequest().getPath().toString());
+//                            logRequest.setAppId(app_id);
+//
+//                            logRequestRepo.save(logRequest);
+//                            return super.getBody();
+//                        }
+//
+//                    }
+//                };
+//
+//                var responseMutated = new ServerHttpResponseDecorator(exchange.getResponse()) {
+//                    @Override
+//                    public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+//                        var responseLogger = new Logger(getDelegate());
+//                        LogRequest logRequests1 = logRequestRepo.findByRequestId(exchange.getRequest().getId());
+//                        if(LOGGABLE_CONTENT_TYPES.contains(String.valueOf(getHeaders().getContentType()).toLowerCase())) {
+//                            return join(body).flatMap(db -> {
+//                                responseLogger.appendBody(db.asByteBuffer());
+//                                responseLogger.log();
+//                                String response_body = StandardCharsets.UTF_8.decode(db.asByteBuffer()).toString();
+//
+//                                if (logRequests1 != null){
+//                                    logRequests1.setResponse(response_body);
+//                                    logRequests1.setStatus_code(exchange.getResponse().getStatusCode().toString());
+//                                    logRequestRepo.save(logRequests1);
+//                                }
+//                                return getDelegate().writeWith(Mono.just(db));
+//                            });
+//                        } else {
+//                            responseLogger.log();
+//                            if (logRequests1 != null){
+//                                logRequests1.setStatus_code(exchange.getResponse().getStatusCode().toString());
+//                                logRequestRepo.save(logRequests1);
+//                            }
+//                            return getDelegate().writeWith(body);
+//                        }
+//
+//                    }
+//                };
+//                return chain.filter(exchange.mutate().request(requestMutated).response(responseMutated).build());
+//            }
+//        } catch (JwtTokenMalformedException e) {
+//            e.printStackTrace();
+//        } catch (JwtTokenMissingException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//
+//        return chain.filter(exchange);
+        return Mono.empty();
     }
 
     private Mono<? extends DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {

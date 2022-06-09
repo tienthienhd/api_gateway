@@ -1,24 +1,24 @@
 package vn.tima.ai.gateway.repository.sql;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+
+import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import vn.tima.ai.gateway.model.ProductRole;
 
-import java.util.List;
-
 @Repository
-public interface ProductRolesRepo extends JpaRepository<ProductRole, String> {
+public interface ProductRolesRepo extends ReactiveCrudRepository<ProductRole, Integer> {
 
-    @Query("select pr from ProductRole pr order by pr.featurePathRegex")
-    List<ProductRole> findAllSortASC();
+    @Query("SELECT pr FROM ProductRole pr order by pr.featurePathRegex")
+    Flux<ProductRole> findAllSortASC();
 
-    @Query("select pr from ProductRole pr order by pr.featurePathRegex desc")
-    List<ProductRole> findAllSortDESC();
+    @Query("SELECT pr FROM ProductRole pr order by pr.featurePathRegex desc")
+    Flux<ProductRole> findAllSortDESC();
 
-    @Query("select pr from ProductRole pr where pr.featurePathRegex = :pathRegex")
-    ProductRole findByFeaturePathRegex(@Param("pathRegex") String pathRegex);
+    @Query("SELECT pr FROM ProductRole pr where pr.featurePathRegex = :pathRegex")
+    Mono<ProductRole> findByFeaturePathRegex(@Param("pathRegex") String pathRegex);
 
 }
