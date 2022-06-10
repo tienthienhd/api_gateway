@@ -6,7 +6,7 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import vn.tima.ai.gateway.filter.AuthenticationFilter;
+//import vn.tima.ai.gateway.filter.AuthenticationFilter;
 
 @Configuration
 public class GatewayConfig {

@@ -12,13 +12,13 @@ import vn.tima.ai.gateway.model.ProductRole;
 @Repository
 public interface ProductRolesRepo extends ReactiveCrudRepository<ProductRole, Integer> {
 
-    @Query("SELECT pr FROM ProductRole pr order by pr.featurePathRegex")
+    @Query("SELECT pr FROM ProductRole pr ORDER BY pr.featurePathRegex")
     Flux<ProductRole> findAllSortASC();
 
-    @Query("SELECT pr FROM ProductRole pr order by pr.featurePathRegex desc")
+    @Query("SELECT pr FROM ProductRole pr ORDER BY pr.featurePathRegex desc")
     Flux<ProductRole> findAllSortDESC();
 
-    @Query("SELECT pr FROM ProductRole pr where pr.featurePathRegex = :pathRegex")
+    @Query("SELECT pr FROM ProductRole pr WHERE pr.featurePathRegex = :pathRegex")
     Mono<ProductRole> findByFeaturePathRegex(@Param("pathRegex") String pathRegex);
 
 }
