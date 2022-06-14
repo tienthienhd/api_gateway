@@ -9,16 +9,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import vn.tima.ai.gateway.model.ProductRole;
 
+
 @Repository
 public interface ProductRolesRepo extends ReactiveCrudRepository<ProductRole, Integer> {
 
-    @Query("SELECT pr FROM ProductRole pr ORDER BY pr.featurePathRegex")
+    @Query("SELECT * FROM product_feature_role pr ORDER BY pr.feature_regex_path")
     Flux<ProductRole> findAllSortASC();
 
-    @Query("SELECT pr FROM ProductRole pr ORDER BY pr.featurePathRegex desc")
+    @Query("SELECT * FROM product_feature_role pr ORDER BY pr.feature_regex_path desc")
     Flux<ProductRole> findAllSortDESC();
 
-    @Query("SELECT pr FROM ProductRole pr WHERE pr.featurePathRegex = :pathRegex")
+    @Query("SELECT * FROM product_feature_role pr WHERE pr.feature_regex_path = :pathRegex")
     Mono<ProductRole> findByFeaturePathRegex(@Param("pathRegex") String pathRegex);
 
 }
