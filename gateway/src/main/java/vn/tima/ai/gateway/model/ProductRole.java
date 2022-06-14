@@ -3,31 +3,31 @@ package vn.tima.ai.gateway.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Entity
 @Table(name = "product_feature_role")
 public class ProductRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column("id")
     protected Integer id;
 
-    @Column(name = "role")
+    @Column("role")
     protected String roleId;
 
-    @Column(name = "service_id")
+    @Column("service_id")
     protected String serviceId;
 
-    @Column(name = "feature_regex_path")
+    @Column("feature_regex_path")
     protected String featurePathRegex;
 
-    @Column(name = "method")
+    @Column("method")
     protected String method;
 
-    @Column(name = "description")
+    @Column("description")
     protected String description;
 
     @Override
