@@ -2,50 +2,50 @@ package vn.tima.ai.gateway.model;
 
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 
 @Data
-@Entity
-@Table(name = "log_request_api_gateway")
+@Table("log_request_api_gateway")
 @ToString
 public class LogRequest {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column("id")
     protected Integer id;
 
-    @Column(name = "request_id")
+    @Column("request_id")
     protected String requestId;
 
-    @Column(name = "uri")
+    @Column("uri")
     protected String uri;
 
-    @Column(name = "method")
+    @Column("method")
     protected String method;
 
-    @Column(name = "timestamp")
+    @Column("timestamp")
     protected String timestamp;
 
-    @Column(name = "duration")
+    @Column("duration")
     protected float duration;
 
-    @Column(name = "path")
+    @Column("path")
     protected String path;
 
-    @Column(name = "app_id")
+    @Column("app_id")
     protected String appId;
 
-    @Column(name = "host_address")
+    @Column("host_address")
     protected String hostAddress;
 
-    @Column(name = "input_body")
+    @Column("input_body")
     protected String inputBody;
 
-    @Column(name = "status_code")
+    @Column("status_code")
     protected String statusCode;
 
-    @Column(name = "response")
+    @Column("response")
     protected String response;
 
 }

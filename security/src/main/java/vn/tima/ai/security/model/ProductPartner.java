@@ -3,38 +3,42 @@ package vn.tima.ai.security.model;
 
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 @Data
-@Entity
-@Table(name = "product_partners")
+@Table("product_partners")
 @ToString
 public class ProductPartner {
 
     @Id
-    @Column(name = "app_id")
+    @Column("app_id")
     protected String appId;
-    @Column(name = "app_key")
+
+    @Column("app_key")
     protected String appKey;
-    @Column(name = "permission")
+
+    @Column("permission")
     protected String permissionRoles;
-    @Column(name = "is_block")
+
+    @Column("is_block")
     protected boolean isBlock;
-    @Column(name = "description")
+
+    @Column("description")
     protected String description;
-    @Column(name = "token_accept_day")
+
+    @Column("token_accept_day")
     protected Integer tokenAcceptDay;
 
-    public ProductPartner(String appId, String appKey, String permissionRoles, Integer tokenAcceptDay){
-        this.appId=appId;
-        this.appKey=appKey;
-        this.permissionRoles=permissionRoles;
-        this.tokenAcceptDay=tokenAcceptDay;
+    public ProductPartner(String appId, String appKey, String permissionRoles, Integer tokenAcceptDay) {
+        this.appId = appId;
+        this.appKey = appKey;
+        this.permissionRoles = permissionRoles;
+        this.tokenAcceptDay = tokenAcceptDay;
     }
 
-    public ProductPartner(){}
+    public ProductPartner() {
+    }
 }

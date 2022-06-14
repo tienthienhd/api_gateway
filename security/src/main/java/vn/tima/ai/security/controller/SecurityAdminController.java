@@ -1,12 +1,13 @@
 package vn.tima.ai.security.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.cloudfoundry.SecurityResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import vn.tima.ai.security.service.SecurityAdminService;
-import org.springframework.boot.actuate.autoconfigure.cloudfoundry.SecurityResponse;
 
 
 @Controller
@@ -19,34 +20,37 @@ public class SecurityAdminController {
 
     @PostMapping("/create-appid")
     public @ResponseBody
-    ResponseEntity<SecurityResponse> createAppId(@RequestParam(name = "appId") String appId,
-                                                 @RequestParam(name = "appKey") String appKey,
-                                                 @RequestParam(name = "permissionRoles") String permissionRoles,
-                                                 @RequestParam(name = "tokenAcceptDay") Integer tokenAcceptDay){
-        SecurityResponse response= securityAdminService.createAppId(appId, appKey, permissionRoles, tokenAcceptDay);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    Mono<ResponseEntity<SecurityResponse>> createAppId(@RequestParam(name = "appId") String appId,
+                                                       @RequestParam(name = "appKey") String appKey,
+                                                       @RequestParam(name = "permissionRoles") String permissionRoles,
+                                                       @RequestParam(name = "tokenAcceptDay") Integer tokenAcceptDay) {
+        Mono<SecurityResponse> response = securityAdminService.createAppId(appId, appKey, permissionRoles, tokenAcceptDay);
+        return response.map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
     }
 
     @PostMapping("/create-token")
     public @ResponseBody
-    ResponseEntity<SecurityResponse> createToken(@RequestParam(name = "appId") String appId,
-                                                 @RequestParam(name = "appKey") String appKey){
-        SecurityResponse response= securityAdminService.createToken(appId, appKey);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    Mono<ResponseEntity<SecurityResponse>> createToken(@RequestParam(name = "appId") String appId,
+                                                       @RequestParam(name = "appKey") String appKey) {
+        return securityAdminService.createToken(appId, appKey)
+                .map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
 
     }
-//
+
+    //
     @PostMapping("/grant-permission")
     public @ResponseBody
-    ResponseEntity<SecurityResponse> grantPermission(@RequestParam(name = "appId") String appId, @RequestParam(name = "permissionRoles") String newPermissionRoles){
-        SecurityResponse response=securityAdminService.grantPermission(appId, newPermissionRoles);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    Mono<ResponseEntity<SecurityResponse>> grantPermission(@RequestParam(name = "appId") String appId,
+                                                           @RequestParam(name = "permissionRoles") String newPermissionRoles) {
+        return securityAdminService.grantPermission(appId, newPermissionRoles)
+                .map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
     }
 
     @PostMapping("/block/{appId}")
-    public ResponseEntity<SecurityResponse> blockAppId(@PathVariable String appId){
-        SecurityResponse response=securityAdminService.blockAppId(appId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public @ResponseBody
+    Mono<ResponseEntity<SecurityResponse>> blockAppId(@PathVariable String appId) {
+        return securityAdminService.blockAppId(appId)
+                .map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
     }
 
 //    @GetMapping("/force/logout/all")

@@ -2,29 +2,32 @@ package vn.tima.ai.security.model;
 
 
 import lombok.Data;
-import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 
 @Data
-@Entity
-@Table(name = "product_feature_role")
-@ToString
+@Table("product_feature_role")
 public class ProductRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    protected int id;
-    @Column(name = "role")
+    @Column("id")
+    protected Integer id;
+
+    @Column("role")
     protected String roleId;
-    @Column(name = "service_id")
+
+    @Column("service_id")
     protected String serviceId;
-    @Column(name = "feature_regex_path")
-    protected String featurePathRegex;
-    @Column(name = "method")
+
+    @Column("feature_regex_path")
+    protected String path;
+
+    @Column("method")
     protected String method;
-    @Column(name = "description")
+
+    @Column("description")
     protected String description;
 
     @Override
@@ -32,14 +35,14 @@ public class ProductRole {
         return "Role: " +
                 "roleId='" + roleId + '\'' +
                 ", serviceId='" + serviceId + '\'' +
-                ", featurePathRegex='" + featurePathRegex + '\'';
+                ", featurePathRegex='" + path + '\'';
     }
 
-    public boolean isChildRoleOf(ProductRole role){
-        return (role.method == null || role.method.equals(this.method)) && this.featurePathRegex.matches(role.getFeaturePathRegex().replaceAll("\\*\\*",".*"));
+    public boolean isChildRoleOf(ProductRole role) {
+        return (role.method == null || role.method.equals(this.method)) && this.path.matches(role.getPath().replaceAll("\\*\\*", ".*"));
     }
 
-    public enum FixRole{
+    public enum FixRole {
         PUBLIC,
         SECURITY_ADMIN
     }
