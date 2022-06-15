@@ -14,6 +14,9 @@ import org.springframework.data.relational.core.mapping.Table;
 public class ProductPartner {
 
     @Id
+    @Column("id")
+    protected Integer id;
+
     @Column("app_id")
     protected String appId;
 
@@ -24,7 +27,7 @@ public class ProductPartner {
     protected String permissionRoles;
 
     @Column("is_block")
-    protected boolean isBlock;
+    protected boolean block;
 
     @Column("description")
     protected String description;

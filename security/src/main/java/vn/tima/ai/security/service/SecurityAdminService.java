@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.autoconfigure.cloudfoundry.SecurityRespo
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import vn.tima.ai.security.model.ProductPartner;
 import vn.tima.ai.security.model.ProductPermissionToken;
@@ -18,6 +19,7 @@ import vn.tima.ai.security.utils.JwtUtil;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 
 @Service
 @Log4j2
@@ -35,26 +37,34 @@ public class SecurityAdminService {
     @Autowired
     protected JwtUtil jwtUtil;
 
-//    @Autowired
-//    private BCryptPasswordEncoder encoder;
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     private boolean isDebug;
 
     private static final String ERROR_MESS = "Can't do action";
 
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
+    @Transactional
     public Mono<SecurityResponse> createAppId(String appId, String appKey, String permissionRoles, Integer tokenAcceptDay) {
-
-        ProductPartner partner = new ProductPartner(appId, encoder.encode(appKey), permissionRoles, tokenAcceptDay);
-        return productPartnersRepo.save(partner).log()
-                .map(productPartner -> SecurityResponse.success())
+        return productPartnersRepo.findByAppId(appId).log()
+                .flatMap(foundPartner -> {
+                    foundPartner.setAppKey(encoder.encode(appKey));
+                    foundPartner.setPermissionRoles(permissionRoles);
+                    foundPartner.setTokenAcceptDay(tokenAcceptDay);
+                    return productPartnersRepo.save(foundPartner);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    ProductPartner partner = new ProductPartner(appId, encoder.encode(appKey), permissionRoles, tokenAcceptDay);
+                    return productPartnersRepo.save(partner);
+                }))
+                .map(productPartner1 -> SecurityResponse.success())
                 .switchIfEmpty(Mono.just(new SecurityResponse(HttpStatus.FORBIDDEN, ERROR_MESS)));
     }
 
+
     public Mono<SecurityResponse> createToken(String appId, String appKey) {
 
-        return productPartnersRepo.findByAppIdAndBlockFalse(appId)
+        return productPartnersRepo.findByAppIdAndBlockIsFalse(appId).log()
                 .map(productPartner -> {
                     if (encoder.matches(appKey, productPartner.getAppKey())) {
                         List author = Collections.singletonList(productPartner.getPermissionRoles());
@@ -62,7 +72,7 @@ public class SecurityAdminService {
 
                         String jwtToken = jwtUtil.generateToken(appId, author, (float) acceptDay);
                         saveToken(appId, jwtToken);
-                        return new SecurityResponse(HttpStatus.OK, "Bearer " + jwtToken);
+                        return new SecurityResponse(HttpStatus.OK, JwtUtil.TOKEN_PREFIX + jwtToken);
                     } else {
                         return new SecurityResponse(HttpStatus.OK, "None");
                     }

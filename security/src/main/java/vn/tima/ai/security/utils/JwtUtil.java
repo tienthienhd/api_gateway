@@ -19,7 +19,7 @@ public class JwtUtil {
 
     public static final String TOKEN_PREFIX = "Bearer ";
 
-    @Value("${jwt.secret_key")
+    @Value("${jwt.secret_key}")
     private String jwtSecret;
 
     public Claims parseToken(String jwtString) {

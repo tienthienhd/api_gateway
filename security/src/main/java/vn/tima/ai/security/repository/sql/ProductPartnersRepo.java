@@ -9,10 +9,10 @@ import vn.tima.ai.security.model.ProductPartner;
 
 
 @Repository
-public interface ProductPartnersRepo extends ReactiveCrudRepository<ProductPartner, String> {
+public interface ProductPartnersRepo extends ReactiveCrudRepository<ProductPartner, Integer> {
 
     Mono<ProductPartner> findByAppId(String appId);
 
-    Mono<ProductPartner> findByAppIdAndBlockFalse(String appId);
+    Mono<ProductPartner> findByAppIdAndBlockIsFalse(String appId);
 
 }

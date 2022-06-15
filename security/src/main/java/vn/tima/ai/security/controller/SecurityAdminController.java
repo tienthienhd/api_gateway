@@ -24,8 +24,8 @@ public class SecurityAdminController {
                                                        @RequestParam(name = "appKey") String appKey,
                                                        @RequestParam(name = "permissionRoles") String permissionRoles,
                                                        @RequestParam(name = "tokenAcceptDay") Integer tokenAcceptDay) {
-        Mono<SecurityResponse> response = securityAdminService.createAppId(appId, appKey, permissionRoles, tokenAcceptDay);
-        return response.map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
+        return securityAdminService.createAppId(appId, appKey, permissionRoles, tokenAcceptDay).log()
+                .map(securityResponse -> new ResponseEntity<>(securityResponse, HttpStatus.OK));
     }
 
     @PostMapping("/create-token")
