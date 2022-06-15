@@ -26,6 +26,6 @@ public interface ProductPartnersRepo extends ReactiveCrudRepository<ProductPartn
     @Query("update ProductPartner pp set pp.isBlock = true where pp.appId = :appId")
     Mono<Integer> blockAppId(@Param("appId") String appId);
 
-    @Query("SELECT pp FROM ProductPartner pp WHERE pp.appId =:appId AND pp.isBlock=false ")
+    @Query("SELECT * FROM product_partners pp WHERE pp.appId =:appId AND pp.isBlock=false ")
     Flux<ProductPartner> findPartnerActiveByAppId(@Param("appId") String appId);
 }

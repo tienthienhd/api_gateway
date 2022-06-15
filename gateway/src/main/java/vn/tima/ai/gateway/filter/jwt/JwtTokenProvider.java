@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 import vn.tima.ai.gateway.exception.JwtTokenMalformedException;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,7 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.Exchanger;
 
 import static java.util.stream.Collectors.joining;
 
@@ -47,7 +49,6 @@ public class JwtTokenProvider {
     }
 
     public String createToken(Authentication authentication) {
-
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Claims claims = Jwts.claims().setSubject(username);
@@ -67,7 +68,7 @@ public class JwtTokenProvider {
 
     }
 
-    public Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(ServerWebExchange exchange, String token) {
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(AUTHORITIES_KEY);
@@ -77,7 +78,9 @@ public class JwtTokenProvider {
 
         User principal = new User(claims.getSubject(), "", authorities);
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        throw new RuntimeException("Incorrect Credentials");
+
+//        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     public boolean validateToken(String token) {
