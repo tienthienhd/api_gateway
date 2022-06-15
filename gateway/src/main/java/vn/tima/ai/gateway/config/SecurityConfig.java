@@ -51,23 +51,27 @@ public class SecurityConfig {
                                                 JwtTokenProvider tokenProvider) {
 
         Flux<ProductRole> productRoles = productRolesRepo.findAll();
-        ArrayList<String> roleList = new ArrayList<>();
+        Customizer<ServerHttpSecurity.AuthorizeExchangeSpec> authorizeExchangeCustomizer = authorizeExchangeSpec -> {
+            productRoles.log().subscribe(s -> {
+                if (s.getRoleId().equals(ProductRole.FixRole.PUBLIC.toString())){
+                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).permitAll();
+                }
+                else{
+                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).authenticated();
+                }
 
-        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                log.info("asdasdasd: " + authorizeExchangeSpec);
+
+            });
+        };
+
+        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance());
-        productRoles.log().subscribe(s -> http.authorizeExchange(it -> {
-                            if (s.getRoleId().equals(ProductRole.FixRole.PUBLIC.toString())) {
-                                it.pathMatchers(s.getFeaturePathRegex()).permitAll();
-                            } else {
-                                it.pathMatchers(s.getFeaturePathRegex()).authenticated();
-                            }
-                        }
-                )
-        );
-//        http.authorizeExchange(it -> it.anyExchange().permitAll());
-        http.addFilterAt(new JwtTokenAuthenticationFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC);
-        return http.build();
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+                .authorizeExchange(authorizeExchangeCustomizer)
+                .addFilterAt(new JwtTokenAuthenticationFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
+                .build();
+
     }
 
     private Mono<AuthorizationDecision> currentUserMatchesPath(Mono<Authentication> authentication,
