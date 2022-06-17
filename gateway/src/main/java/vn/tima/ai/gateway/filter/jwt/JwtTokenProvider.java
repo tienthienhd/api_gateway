@@ -68,7 +68,7 @@ public class JwtTokenProvider {
 
     }
 
-    public Authentication getAuthentication(ServerWebExchange exchange, String token) {
+    public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(AUTHORITIES_KEY);
@@ -78,9 +78,9 @@ public class JwtTokenProvider {
 
         User principal = new User(claims.getSubject(), "", authorities);
 
-        throw new RuntimeException("Incorrect Credentials");
+//        throw new RuntimeException("Incorrect Credentials");
 
-//        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     public boolean validateToken(String token) {

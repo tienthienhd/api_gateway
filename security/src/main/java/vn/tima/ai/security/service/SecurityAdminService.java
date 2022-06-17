@@ -67,7 +67,7 @@ public class SecurityAdminService {
             if (encoder.matches(appKey, productPartner.getAppKey())){
                 log.info(productPartner.getPermissionRoles());
                 log.info(productPartner.getTokenAcceptDay());
-                List author = Arrays.asList(productPartner.getPermissionRoles());
+                List author = Arrays.asList("ROLE_"+productPartner.getPermissionRoles());
                 Integer acceptDay = productPartner.getTokenAcceptDay();
                 long now = System.currentTimeMillis();
                 Date issuedAt = new Date(now);

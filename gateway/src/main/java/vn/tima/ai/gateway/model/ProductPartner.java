@@ -3,11 +3,16 @@ package vn.tima.ai.gateway.model;
 
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Data
 @Entity
@@ -17,22 +22,22 @@ public class ProductPartner {
 
     @Id
     @Column(name = "app_id")
-    protected String appId;
+    public String appId;
 
     @Column(name = "app_key")
-    protected String appKey;
+    public String appKey;
 
     @Column(name = "permission")
-    protected String permissionRoles;
+    public String permissionRoles;
 
     @Column(name = "is_block")
-    protected boolean isBlock;
+    public boolean block;
 
     @Column(name = "description")
-    protected String description;
+    public String description;
 
     @Column(name = "token_accept_day")
-    protected Integer tokenAcceptDay;
+    public Integer tokenAcceptDay;
 
     public ProductPartner(String appId, String appKey, String permissionRoles, Integer tokenAcceptDay) {
         this.appId = appId;
