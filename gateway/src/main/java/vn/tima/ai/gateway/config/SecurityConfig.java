@@ -72,7 +72,7 @@ public class SecurityConfig {
                 if (String.valueOf(ProductRole.FixRole.PUBLIC).equals(s.getRoleId())) {
                     authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).permitAll();
                 } else {
-                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).hasAuthority(s.getRoleId());
+                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).hasAnyRole(s.getRoleId());
                 }
                 return s;
             }).blockLast();
@@ -86,15 +86,6 @@ public class SecurityConfig {
                 .authorizeExchange(authorizeExchangeCustomizer)
                 .addFilterAt(new JwtTokenAuthenticationFilter(tokenProvider), SecurityWebFiltersOrder.HTTP_BASIC)
                 .build();
-
-    }
-
-    private Mono<AuthorizationDecision> currentUserMatchesPath(Mono<Authentication> authentication,
-                                                               AuthorizationContext context) {
-
-        return authentication
-                .map(a -> context.getVariables().get("user").equals(a.getName()))
-                .map(AuthorizationDecision::new);
 
     }
 

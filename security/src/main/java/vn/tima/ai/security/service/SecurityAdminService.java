@@ -48,7 +48,7 @@ public class SecurityAdminService {
     public SecurityResponse createAppId(String appId, String appKey, String permissionRoles, Integer tokenAcceptDay){
 
         try {
-            ProductPartner partner= new ProductPartner(appId, encoder.encode(appKey), permissionRoles, tokenAcceptDay);
+            ProductPartner partner= new ProductPartner(appId, encoder.encode(appKey), "ROLE_"+permissionRoles, tokenAcceptDay);
             productPartnersRepo.save(partner);
             return SecurityResponse.success();
         } catch (Exception e){
@@ -67,7 +67,8 @@ public class SecurityAdminService {
             if (encoder.matches(appKey, productPartner.getAppKey())){
                 log.info(productPartner.getPermissionRoles());
                 log.info(productPartner.getTokenAcceptDay());
-                List author = Arrays.asList("ROLE_"+productPartner.getPermissionRoles());
+//                List author = Arrays.asList("ROLE_"+productPartner.getPermissionRoles());
+                String author = productPartner.getPermissionRoles();
                 Integer acceptDay = productPartner.getTokenAcceptDay();
                 long now = System.currentTimeMillis();
                 Date issuedAt = new Date(now);

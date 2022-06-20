@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class DemoController {
 
     @GetMapping("/1")
-    public String test1(@RequestBody String str) {
-        System.out.println("11111 " + str);
-        return str;
+    public String test1() {
+        return "test service1 appraisal_auto_check_1111111111";
     }
 
     @GetMapping("/2")
     public String test2() {
-        return "test service appraisal_auto_check2222222222";
+        return "test service1 appraisal_auto_check_2222222222";
     }
 }
