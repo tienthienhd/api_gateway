@@ -13,6 +13,7 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -65,18 +66,37 @@ public class SecurityConfig {
                                                 JwtTokenProvider tokenProvider,
                                                 ReactiveAuthenticationManager reactiveAuthenticationManager) {
 
-        Flux<ProductRole> productRoles = productRolesRepo.findAll();
+        Flux<ProductRole> productRoles = productRolesRepo.findAllSortDESC();
+
+        List<ProductRole> roles = new ArrayList<>();
 
         Customizer<ServerHttpSecurity.AuthorizeExchangeSpec> authorizeExchangeCustomizer = authorizeExchangeSpec -> {
             productRoles.log().map(s -> {
-                if (String.valueOf(ProductRole.FixRole.PUBLIC).equals(s.getRoleId())) {
-                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).permitAll();
-                } else {
-                    authorizeExchangeSpec.pathMatchers(s.getFeaturePathRegex()).hasAnyRole(s.getRoleId());
-                }
+                roles.add(s);
                 return s;
             }).blockLast();
+
+            for(int i=0; i< roles.size(); i++){
+                ProductRole thisRole = roles.get(i);
+
+                if(String.valueOf(ProductRole.FixRole.PUBLIC).equals(thisRole.getRoleId())){
+                    log.info("Gateway set role: "+ thisRole.getFeaturePathRegex() + " - [PUBLIC]");
+                    authorizeExchangeSpec.pathMatchers(thisRole.getFeaturePathRegex()).permitAll();
+                } else {
+                    List<String> roleIDs = new ArrayList<>();
+                    for(int j = i; j< roles.size(); j++){
+                        ProductRole nextRole = roles.get(j);
+                        if(thisRole.isChildRoleOf(nextRole) && !String.valueOf(ProductRole.FixRole.PUBLIC).equals(nextRole.getRoleId()))
+                            roleIDs.add(nextRole.getRoleId());
+                    }
+                    log.info("Gateway set role: " + thisRole.getFeaturePathRegex() + " - " + roleIDs.toString());
+                    authorizeExchangeSpec.pathMatchers(thisRole.getFeaturePathRegex()).hasAnyRole(roleIDs.toArray(new String[roleIDs.size()]));
+                }
+            }
+
+
             authorizeExchangeSpec.anyExchange().denyAll();
+
         };
 
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)

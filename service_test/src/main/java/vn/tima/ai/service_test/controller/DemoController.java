@@ -18,4 +18,9 @@ public class DemoController {
     public String test2() {
         return "test service1 appraisal_auto_check_2222222222";
     }
+
+    @GetMapping("/2/2")
+    public String test22() {
+        return "childddddddddddddddddddddddddddd";
+    }
 }
