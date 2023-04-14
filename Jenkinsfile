@@ -3,8 +3,11 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh '''mvn package
-'''
+        withMaven(publisherStrategy: 'implicit') {
+          sh 'mvn clean'
+          sh 'mvn package'
+        }
+
       }
     }
 
